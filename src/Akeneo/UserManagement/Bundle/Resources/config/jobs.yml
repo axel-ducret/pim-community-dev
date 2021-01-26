@@ -31,9 +31,9 @@ services:
       - 'export'
       - '@event_dispatcher'
       - '@akeneo_batch.job_repository'
-      - '@pim_connector.reader.dummy_item'
-      - '@pim_connector.processor.dummy_item'
-      - '@pim_connector.writer.dummy_item'
+      - '@pim_user.reader.user.database'
+      - '@pim_user.processor.normalization.user'
+      - '@pim_user.writer.file.csv.user'
       - 100
       - '@akeneo_batch.job.job_stopper'
 
@@ -43,9 +43,9 @@ services:
       - 'export'
       - '@event_dispatcher'
       - '@akeneo_batch.job_repository'
-      - '@pim_connector.reader.dummy_item'
-      - '@pim_connector.processor.dummy_item'
-      - '@pim_connector.writer.dummy_item'
+      - '@pim_user.reader.user.database'
+      - '@pim_user.processor.normalization.user'
+      - '@pim_user.writer.file.xlsx.user'
       - 100
       - '@akeneo_batch.job.job_stopper'
 
@@ -82,3 +82,31 @@ services:
         - 'xlsx_user_export'
     tags:
       - { name: akeneo_batch.job.job_parameters.default_values_provider }
+
+  ## Readers
+  pim_user.reader.user.database:
+    class: 'Akeneo\Tool\Component\Connector\Reader\Database\Reader'
+    arguments:
+      - '@pim_user.repository.user'
+
+  ## Processors:
+  pim_user.processor.normalization.user:
+    class: 'Akeneo\Tool\Component\Connector\Processor\Normalization\Processor'
+    arguments:
+      - '@pim_user.normalizer.user.standard'
+      - '@akeneo_storage_utils.doctrine.object_detacher'
+
+  ## Writers
+  pim_user.writer.file.csv.user:
+    class: 'Akeneo\Tool\Component\Connector\Writer\File\Csv\Writer'
+    arguments:
+      - '@pim_connector.array_converter.standard_to_flat.user'
+      - '@pim_connector.factory.flat_item_buffer'
+      - '@pim_connector.writer.file.flat_item_buffer_flusher'
+
+  pim_user.writer.file.xlsx.user:
+    class: 'Akeneo\Tool\Component\Connector\Writer\File\Xlsx\Writer'
+    arguments:
+      - '@pim_connector.array_converter.standard_to_flat.user'
+      - '@pim_connector.factory.flat_item_buffer'
+      - '@pim_connector.writer.file.flat_item_buffer_flusher'
